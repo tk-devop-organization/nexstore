@@ -1,0 +1,63 @@
+<%= form_with(model: [:admin, @product], local: true, html: { multipart: true, class: "container mt-4" }) do |form| %>
+  <% if @product.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h4>
+      <ul>
+        <% @product.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <%= form.label :name, class: "form-label" %>
+      <%= form.text_field :name, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6">
+      <%= form.label :price, class: "form-label" %>
+      <%= form.number_field :price, step: "0.01", class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <%= form.label :description, class: "form-label" %>
+      <%= form.text_area :description, class: "form-control", rows: 4 %>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <%= form.label :stock, class: "form-label" %>
+      <%= form.number_field :stock, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6">
+      <%= form.label :images, "Add New Images", class: "form-label" %>
+      <%= form.file_field :images, multiple: true, class: "form-control" %>
+    </div>
+  </div>
+
+  <% if @product.images.attached? %>
+    <h3>Current Images:</h3>
+    <div class="row">
+      <% @product.images.each do |image| %>
+        <div class="col-md-3 mb-3">
+          <div class="image-wrapper">
+            <%= image_tag image, class: "img-thumbnail" %>
+            <label class="form-check-label mt-2">
+              <%= check_box_tag "product[remove_images][]", image.id, false, class: "form-check-input" %> Remove
+            </label>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="d-flex justify-content-end mt-3">
+    <%= form.submit "Update Product", class: "btn btn-primary btn-lg" %>
+  </div>
+<% end %>

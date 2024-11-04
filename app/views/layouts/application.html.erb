@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NexStore</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <%= javascript_importmap_tags %>
+  <%#= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+</head>
+
+<body>
+<header>
+  <% if user_signed_in? %>
+    <%= render 'layouts/admin_header' %>
+  <% end %>
+</header>
+
+<div class="container mt-3">
+  <%= yield %>
+</div>
+</body>
+</html>

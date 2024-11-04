@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D House Model</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const createBox = (width, height, depth, color, position) => {
+        const geometry = new THREE.BoxGeometry(width, height, depth);
+        const material = new THREE.MeshBasicMaterial({ color });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(...position);
+        scene.add(cube);
+    };
+
+    // Create rooms
+    createBox(15, 5, 18, 0xffcc00, [0, 2.5, -20]); // Drawing Room
+    createBox(12, 5, 15, 0x00ccff, [0, 2.5, -10]); // Dining Hall
+    createBox(12, 5, 12, 0xff6600, [0, 2.5, 0]); // Kitchen
+    createBox(15, 5, 15, 0x66ff66, [-15, 2.5, 10]); // Master Bedroom
+    createBox(12, 5, 12, 0xff66cc, [15, 2.5, 10]); // Additional Bedroom
+    createBox(8, 5, 10, 0xcccccc, [-7.5, 2.5, 15]); // Common Bathroom
+    createBox(8, 5, 10, 0xcccccc, [-7.5, 2.5, 5]); // Master Bathroom
+
+    camera.position.z = 50;
+
+    const animate = function () {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    };
+
+    animate();
+</script>
+</body>
+</html>

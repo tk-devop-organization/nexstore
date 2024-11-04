@@ -1,0 +1,12 @@
+<div class="container">
+  <h1><%= @product.name %></h1>
+  <div class="product-images">
+    <% @product.images.each do |image| %>
+      <%= image_tag image, class: "img-thumbnail" %>
+    <% end %>
+  </div>
+  <p><%= @product.description %></p>
+  <p><strong>Price: </strong>$<%= @product.price %></p>
+
+  <%#= link_to 'Place Order (Cash on Delivery)', new_order_path(product_id: @product.id), class: 'btn btn-success' %>
+</div>
