@@ -18,6 +18,7 @@ services:
     environment:
       - SONAR_JDBC_USERNAME=sonar
       - SONAR_JDBC_PASSWORD=sonar
+
     networks:
       - jenkins_sonarqube_network
 
