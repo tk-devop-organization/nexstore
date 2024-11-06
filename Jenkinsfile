@@ -99,14 +99,10 @@
 
 
 
-
 pipeline {
     agent any
-    
+
     options {
-        // Create Docker volumes for dependency caching
-        dockerVolumeCreate('jenkins_gems')
-        dockerVolumeCreate('jenkins_node_modules')
         // Add timeout for the whole pipeline
         timeout(time: 1, unit: 'HOURS')
     }
@@ -124,9 +120,19 @@ pipeline {
             }
         }
 
+        stage('Setup Docker Volumes') {
+            steps {
+                script {
+                    // Manually create Docker volumes
+                    sh 'docker volume create jenkins_gems'
+                    sh 'docker volume create jenkins_node_modules'
+                }
+            }
+        }
+
         stage('Backend') {
             agent {
-                docker { 
+                dockerContainer {
                     image 'ruby:3.2.2'
                     args '-v jenkins_gems:/usr/local/bundle'
                     reuseNode true
@@ -163,7 +169,7 @@ pipeline {
 
         stage('Frontend') {
             agent {
-                docker { 
+                dockerContainer {
                     image 'node:16'
                     args '-v jenkins_node_modules:/app/frontend/node_modules'
                     reuseNode true
