@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('SCM Checkout') {
             agent {
-                docker { image 'ruby:3.2.2' }  // Use the Ruby 3.2.2 Docker image for this stage
+                dockerContainer { image 'ruby:3.2.2' }  // Use the Ruby 3.2.2 Docker image for this stage
             }
             steps {
                 checkout scm
@@ -26,7 +26,7 @@ pipeline {
 
         stage('Backend - Install Dependencies') {
             agent {
-                docker { image 'ruby:3.2.2' }
+                dockerContainer { image 'ruby:3.2.2' }
             }
             steps {
                 script {
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Backend - Run RSpec Tests') {
             agent {
-                docker { image 'ruby:3.2.2' }
+                dockerContainer { image 'ruby:3.2.2' }
             }
             steps {
                 sh 'RAILS_ENV=test bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml'
@@ -53,7 +53,7 @@ pipeline {
 
         stage('Frontend - Install Dependencies') {
             agent {
-                docker { image 'node:16' }  // Use Node image for frontend
+                dockerContainer { image 'node:16' }  // Use Node image for frontend
             }
             steps {
                 dir('frontend') {
@@ -64,7 +64,7 @@ pipeline {
 
         stage('Frontend - Run ESLint') {
             agent {
-                docker { image 'node:16' }  // Use Node image for frontend
+                dockerContainer { image 'node:16' }  // Use Node image for frontend
             }
             steps {
                 dir('frontend') {
