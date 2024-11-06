@@ -14,15 +14,9 @@
 pipeline {
     agent any  // This will run the pipeline on any available agent
 
-    environment {
-        // Define tools and environment variables if needed
-        SONARQUBE_SCANNER_HOME = tool name: 'SonarScanner', type: 'ToolLocation'
-    }
-
     stages {
         stage('SCM Checkout') {
             steps {
-                // Checkout code from GitHub repository
                 checkout scm
             }
         }
@@ -30,7 +24,6 @@ pipeline {
         stage('Backend - Install Dependencies') {
             steps {
                 script {
-                    // Install Ruby and Bundler dependencies for Rails
                     sh 'gem install bundler'
                     sh 'bundle install'
                 }
@@ -39,39 +32,32 @@ pipeline {
 
         stage('Backend - Run RSpec Tests') {
             steps {
-                // Run RSpec tests and output results to XML
                 sh 'RAILS_ENV=test bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml'
             }
             post {
                 always {
-                    // Archive RSpec test results and show in Jenkins (JUnit format)
                     archiveArtifacts artifacts: 'rspec_results.xml', allowEmptyArchive: true
-                    junit 'rspec_results.xml'  // Jenkins will process the RSpec XML results
+                    junit 'rspec_results.xml'
                 }
             }
         }
 
         stage('Frontend - Install Dependencies') {
             steps {
-                script {
-                    // Install Node.js dependencies for React app
-                    dir('frontend') {
-                        sh 'npm install'
-                    }
+                dir('frontend') {
+                    sh 'npm install'
                 }
             }
         }
 
         stage('Frontend - Run ESLint') {
             steps {
-                // Run ESLint on the frontend directory and output to XML
                 dir('frontend') {
-                    sh 'npm run lint || true' // Continue even if linting fails
+                    sh 'npm run lint -- --format junit --output-file frontend/eslint_results.xml || true'
                 }
             }
             post {
                 always {
-                    // Archive ESLint results (if any)
                     archiveArtifacts artifacts: 'frontend/eslint_results.xml', allowEmptyArchive: true
                 }
             }
@@ -80,20 +66,18 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Ensure SonarScanner is found in Jenkins
-                    def scannerHome = tool 'SonarScanner'  // This must match the name in Global Tool Configuration
-                    withSonarQubeEnv('SonarQube') {  // Ensure this matches the name of your SonarQube server in Jenkins
+                    // This will use the SonarQube Scanner from Global Tool Configuration
+                    def scannerHome = tool 'SonarScanner'  // Name must match SonarQube Scanner configured in Jenkins
+                    withSonarQubeEnv('SonarQube') {  // This should match your SonarQube server name
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
             }
         }
-
     }
 
     post {
         always {
-            // Cleanup workspace after the build
             cleanWs()
         }
     }
