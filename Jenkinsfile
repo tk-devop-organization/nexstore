@@ -131,28 +131,21 @@ pipeline {
         }
 
         stage('Backend') {
-            agent {
-                dockerContainer {
-                    image 'ruby:3.2.2'
-                    args '-v jenkins_gems:/usr/local/bundle'
-                    reuseNode true
-                }
-            }
-            options {
-                timeout(time: 20, unit: 'MINUTES')
-            }
             steps {
                 script {
-                    try {
-                        sh '''
-                            gem install bundler
-                            bundle config set --local path "vendor/bundle"
-                            bundle install --jobs=4 --retry=3
-                            bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml
-                        '''
-                    } catch (Exception e) {
-                        echo "Backend stage failed: ${e.message}"
-                        throw e
+                    // Run the Backend stage in a docker container
+                    docker.image('ruby:3.2.2').inside('-v jenkins_gems:/usr/local/bundle') {
+                        try {
+                            sh '''
+                                gem install bundler
+                                bundle config set --local path "vendor/bundle"
+                                bundle install --jobs=4 --retry=3
+                                bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend stage failed: ${e.message}"
+                            throw e
+                        }
                     }
                 }
             }
@@ -168,24 +161,17 @@ pipeline {
         }
 
         stage('Frontend') {
-            agent {
-                dockerContainer {
-                    image 'node:16'
-                    args '-v jenkins_node_modules:/app/frontend/node_modules'
-                    reuseNode true
-                }
-            }
-            options {
-                timeout(time: 15, unit: 'MINUTES')
-            }
             steps {
-                dir('frontend') {
-                    script {
+                script {
+                    // Run the Frontend stage in a docker container
+                    docker.image('node:16').inside('-v jenkins_node_modules:/app/frontend/node_modules') {
                         try {
-                            sh '''
-                                npm ci
-                                npm run lint -- --format junit --output-file eslint_results.xml || true
-                            '''
+                            dir('frontend') {
+                                sh '''
+                                    npm ci
+                                    npm run lint -- --format junit --output-file eslint_results.xml || true
+                                '''
+                            }
                         } catch (Exception e) {
                             echo "Frontend stage failed: ${e.message}"
                             throw e
