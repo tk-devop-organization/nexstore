@@ -80,13 +80,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Run SonarQube analysis on the codebase
-                    withSonarQubeEnv('SonarQube') {
-                        sh "${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner"
+                    // Ensure SonarScanner is found in Jenkins
+                    def scannerHome = tool 'SonarScanner'  // This must match the name in Global Tool Configuration
+                    withSonarQubeEnv('SonarQube') {  // Ensure this matches the name of your SonarQube server in Jenkins
+                        sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
             }
         }
+
     }
 
     post {
