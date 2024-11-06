@@ -12,7 +12,9 @@
 
 
 pipeline {
-    agent any  // This will run the pipeline on any available agent
+    agent {
+        docker { image 'ruby:3.2.2' }  // Use the Ruby 3.2.2 Docker image
+    }
 
     stages {
         stage('SCM Checkout') {
@@ -24,8 +26,8 @@ pipeline {
         stage('Backend - Install Dependencies') {
             steps {
                 script {
-                    sh 'gem install bundler'
-                    sh 'bundle install'
+                    sh 'gem install bundler'  // Install bundler if not already installed
+                    sh 'bundle install'       // Install project dependencies via bundler
                 }
             }
         }
@@ -36,6 +38,7 @@ pipeline {
             }
             post {
                 always {
+                    // Archive RSpec test results and show them in Jenkins (JUnit format)
                     archiveArtifacts artifacts: 'rspec_results.xml', allowEmptyArchive: true
                     junit 'rspec_results.xml'
                 }
@@ -45,7 +48,7 @@ pipeline {
         stage('Frontend - Install Dependencies') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
+                    sh 'npm install'  // Install Node.js dependencies for React app
                 }
             }
         }
@@ -58,6 +61,7 @@ pipeline {
             }
             post {
                 always {
+                    // Archive ESLint results and show them in Jenkins
                     archiveArtifacts artifacts: 'frontend/eslint_results.xml', allowEmptyArchive: true
                 }
             }
@@ -78,7 +82,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            cleanWs()  // Clean up workspace after the build
         }
     }
 }
