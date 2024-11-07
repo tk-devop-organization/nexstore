@@ -1,7 +1,70 @@
+# services:
+#   jenkins:
+#     image: jenkins/jenkins:lts
+#     container_name: jenkins
+#     user: root  # Run the container as root
+#     ports:
+#       - "8080:8080"
+#       - "50000:50000"
+#     volumes:
+#       - jenkins_home:/var/jenkins_home
+#     networks:
+#       - jenkins_sonarqube_network
+#   sonarqube:
+#     image: sonarqube:community
+#     container_name: sonarqube
+#     ports:
+#       - "9000:9000"
+#     environment:
+#       - SONAR_JDBC_USERNAME=sonar
+#       - SONAR_JDBC_PASSWORD=sonar
+
+#     networks:
+#       - jenkins_sonarqube_network
+
+# volumes:
+#   jenkins_home:
+
+# networks:
+#   jenkins_sonarqube_network:
+#     driver: bridge
+
+
+
 services:
+  # Backend (Rails application)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Make sure to point to the correct Dockerfile for backend
+    container_name: nexstore_backend
+    ports:
+      - "3000:3000"  # Rails default port
+    volumes:
+      - ".:/app"
+    networks:
+      - nexstore_network
+
+  # Frontend (React application)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile  # Path to frontend Dockerfile
+    container_name: nexstore_frontend
+    ports:
+      - "3001:3000"  # React default port
+    volumes:
+      - "./frontend:/frontend"
+    depends_on:
+      - backend
+    networks:
+      - nexstore_network
+
+  # Jenkins service
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
+    user: root  # Run the container as root (be cautious)
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -10,6 +73,7 @@ services:
     networks:
       - jenkins_sonarqube_network
 
+  # SonarQube service
   sonarqube:
     image: sonarqube:community
     container_name: sonarqube
@@ -18,7 +82,6 @@ services:
     environment:
       - SONAR_JDBC_USERNAME=sonar
       - SONAR_JDBC_PASSWORD=sonar
-
     networks:
       - jenkins_sonarqube_network
 
@@ -26,5 +89,7 @@ volumes:
   jenkins_home:
 
 networks:
+  nexstore_network:
+    driver: bridge
   jenkins_sonarqube_network:
     driver: bridge
