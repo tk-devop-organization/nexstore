@@ -10,9 +10,14 @@
 //   }
 // }
 
-
 pipeline {
     agent any  // Use the Jenkins container itself
+
+    environment {
+        // Define Ruby-related environment variables
+        RVM_HOME = '/usr/local/rvm'
+        PATH = "/usr/local/rvm/bin:${RVM_HOME}/rubies/ruby-3.2.2/bin:${env.PATH}" // Add Ruby and Bundler to PATH
+    }
 
     stages {
         stage('SCM Checkout') {
@@ -24,18 +29,22 @@ pipeline {
         stage('Backend - Install Dependencies') {
             steps {
                 script {
-                    // Ensure bundler is installed
-                    sh 'gem install bundler'
-
-                    // Install Ruby project dependencies
-                    sh 'bundle install'
+                    // Ensure RVM is sourced before running gem or bundle commands
+                    sh '''
+                        source /usr/local/rvm/scripts/rvm
+                        gem install bundler
+                        bundle install
+                    '''
                 }
             }
         }
 
         stage('Backend - Run RSpec Tests') {
             steps {
-                sh 'RAILS_ENV=test bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml'
+                script {
+                    // Run RSpec tests
+                    sh 'RAILS_ENV=test bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml'
+                }
             }
             post {
                 always {
@@ -87,4 +96,3 @@ pipeline {
         }
     }
 }
-
