@@ -31,7 +31,7 @@ pipeline {
                 script {
                     // Ensure RVM is sourced before running gem or bundle commands
                     sh '''
-                        source /usr/local/rvm/scripts/rvm
+                        . /usr/local/rvm/scripts/rvm
                         gem install bundler
                         bundle install
                     '''
