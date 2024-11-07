@@ -12,34 +12,28 @@
 
 
 pipeline {
-    agent any
+    agent any  // Use the Jenkins container itself
 
     stages {
         stage('SCM Checkout') {
-            agent {
-                dockerContainer { image 'ruby:3.2.2' }  // Use the Ruby 3.2.2 Docker image for this stage
-            }
             steps {
                 checkout scm
             }
         }
 
         stage('Backend - Install Dependencies') {
-            agent {
-                dockerContainer { image 'ruby:3.2.2' }
-            }
             steps {
                 script {
-                    sh 'gem install bundler'  // Install bundler if not already installed
-                    sh 'bundle install'       // Install project dependencies via bundler
+                    // Ensure bundler is installed
+                    sh 'gem install bundler'
+
+                    // Install Ruby project dependencies
+                    sh 'bundle install'
                 }
             }
         }
 
         stage('Backend - Run RSpec Tests') {
-            agent {
-                dockerContainer { image 'ruby:3.2.2' }
-            }
             steps {
                 sh 'RAILS_ENV=test bundle exec rspec --format RspecJunitFormatter --out rspec_results.xml'
             }
@@ -52,22 +46,18 @@ pipeline {
         }
 
         stage('Frontend - Install Dependencies') {
-            agent {
-                dockerContainer { image 'node:16' }  // Use Node image for frontend
-            }
             steps {
                 dir('frontend') {
-                    sh 'npm install'  // Install Node.js dependencies for React app
+                    // Install frontend dependencies using Yarn (if Yarn is not yet installed)
+                    sh 'npm install'  // This works with your installed Node.js version
                 }
             }
         }
 
         stage('Frontend - Run ESLint') {
-            agent {
-                dockerContainer { image 'node:16' }  // Use Node image for frontend
-            }
             steps {
                 dir('frontend') {
+                    // Run ESLint on the frontend code
                     sh 'npm run lint -- --format junit --output-file frontend/eslint_results.xml || true'
                 }
             }
@@ -81,6 +71,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    // Configure SonarScanner for SonarQube analysis
                     def scannerHome = tool 'SonarScanner'  // Name must match SonarQube Scanner configured in Jenkins
                     withSonarQubeEnv('SonarQube') {  // This should match your SonarQube server name
                         sh "${scannerHome}/bin/sonar-scanner"
