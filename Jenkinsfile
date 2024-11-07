@@ -31,6 +31,7 @@ pipeline {
                 script {
                     // Ensure RVM is sourced before running gem or bundle commands
                     sh '''
+                        apt-get update && apt-get install -y libpq-dev
                         . /usr/local/rvm/scripts/rvm
                         gem install bundler
                         bundle install
